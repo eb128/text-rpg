@@ -1,4 +1,4 @@
-// ===== gameState object =====
+// ===== Game State =====
 const gameState = {
   player: {
     name: "",
@@ -15,13 +15,9 @@ const gameState = {
   },
   location: "village",
   visitedLocations: ["village"],
-  quests: {
-    "firstQuest": "not-started"
-  },
+  quests: {},
   mapUnlocked: {
-    "village": true,
-    "forest": false,
-    "cave": false
+    village: true
   },
   flags: {}
 };
@@ -33,67 +29,21 @@ function showText(text) {
   gameDisplay.textContent = text;
 }
 
-// ===== Scene Functions =====
-function showIntro() {
-  showText(`
-Welcome to ASCII Fantasy RPG!
-
-[1] Start a new game
-[2] Load game (not available)
-`);
-  currentScene = handleIntroInput;
-}
-
-function showClassSelection() {
-  showText(`
-Choose your class:
-
-[1] Knight  (High HP, strong attacks)
-[2] Mage    (Spells, powerful magic)
-[3] Rogue   (Fast and sneaky)
-`);
-  currentScene = handleClassSelection;
-}
-
-function showVillage() {
-  showText(`
-You are in the peaceful village.
-
-[1] Talk to a villager
-[2] Check inventory
-[3] Leave village
-`);
-  currentScene = handleVillageInput;
-}
-
-// ===== Input Handling =====
+// ===== Input System =====
 let currentScene = null;
 
+// Handle numeric key input
 document.addEventListener("keydown", function (e) {
-  if (e.key === "1" || e.key === "2" || e.key === "3") {
+  if (["1", "2", "3"].includes(e.key)) {
     if (currentScene) currentScene(e.key);
   } else if (e.key === "Enter" && !currentScene) {
     showIntro();
   }
 });
 
-// ===== Scene Handlers =====
-function handleIntroInput(choice) {
-  if (choice === "1") {
-    showText("Enter your name:");
-    currentScene = handleNameInput;
-    listeningForName = true;
-  } else {
-    showText("That option doesn't work yet.");
-  }
-}
-
+// Handle text input for name
 let listeningForName = false;
 let nameBuffer = "";
-
-function handleNameInput(e) {
-  // This is a dummy handler to satisfy scene system
-}
 
 document.addEventListener("keypress", function (e) {
   if (!listeningForName) return;
@@ -105,9 +55,51 @@ document.addEventListener("keypress", function (e) {
     showClassSelection();
   } else {
     nameBuffer += e.key;
-    showText(`Enter your name: ${nameBuffer}`);
+    showText(getNameInputScreen(nameBuffer));
   }
 });
+
+// ===== Scenes =====
+function showIntro() {
+  showText(`
+╔════════════════════════════╗
+║      ASCII FANTASY RPG     ║
+╚════════════════════════════╝
+
+[1] Start New Game
+[2] Load Game (Not Available)
+  `);
+  currentScene = handleIntroInput;
+}
+
+function handleIntroInput(choice) {
+  if (choice === "1") {
+    showText(getNameInputScreen(""));
+    listeningForName = true;
+    currentScene = () => {}; // Disable numbered input for name typing
+  } else {
+    showText("Load game is not available. Press [1] to start.");
+  }
+}
+
+function getNameInputScreen(current) {
+  return `
+Enter your name:
+> ${current}_`;
+}
+
+function showClassSelection() {
+  showText(`
+Choose your class:
+
+[1] Knight  - High HP and strong defense
+[2] Mage    - High magic power, low defense
+[3] Rogue   - Fast, agile, and sneaky
+
+Your name: ${gameState.player.name}
+`);
+  currentScene = handleClassSelection;
+}
 
 function handleClassSelection(choice) {
   let selectedClass = "";
@@ -118,22 +110,46 @@ function handleClassSelection(choice) {
   else return;
 
   gameState.player.class = selectedClass;
-  showText(`Welcome, ${gameState.player.name} the ${selectedClass}!\n\nPress [Enter] to continue...`);
+
+  // Set stats based on class
+  if (selectedClass === "Knight") {
+    gameState.player.hp = 120;
+    gameState.player.attack = 10;
+    gameState.player.defense = 15;
+  } else if (selectedClass === "Mage") {
+    gameState.player.hp = 80;
+    gameState.player.attack = 18;
+    gameState.player.defense = 5;
+  } else if (selectedClass === "Rogue") {
+    gameState.player.hp = 100;
+    gameState.player.attack = 12;
+    gameState.player.defense = 8;
+  }
+
+  showText(`
+╔════════════════════════════╗
+║      CHARACTER CREATED     ║
+╚════════════════════════════╝
+
+Name : ${gameState.player.name}
+Class: ${selectedClass}
+
+Press [Enter] to begin your adventure...
+`);
   currentScene = () => {
     showVillage();
   };
 }
 
-function handleVillageInput(choice) {
-  if (choice === "1") {
-    showText("Villager: Nice weather, huh?");
-  } else if (choice === "2") {
-    const inv = gameState.player.inventory.length
-      ? gameState.player.inventory.join(", ")
-      : "Nothing";
-    showText(`Inventory: ${inv}`);
-  } else if (choice === "3") {
-    showText("You can't leave yet. The forest gate is locked.");
-  }
+function showVillage() {
+  showText(`
+You are in your quiet village.
+
+[1] Talk to a villager
+[2] Check inventory
+[3] Leave village
+  `);
+  currentScene = handleVillageInput;
 }
 
+function ha
