@@ -63,7 +63,7 @@ document.addEventListener("keypress", function (e) {
 function showIntro() {
   showText(`
 ╔════════════════════════════╗
-║      ASCII FANTASY RPG     ║
+║          TEXT RPG          ║
 ╚════════════════════════════╝
 
 [1] Start New Game
