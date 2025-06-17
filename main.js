@@ -152,4 +152,15 @@ You are in your quiet village.
   currentScene = handleVillageInput;
 }
 
-function ha
+function handleVillageInput(choice) {
+  if (choice === "1") {
+    showText("The villager says: 'Lovely day, isn't it?'");
+  } else if (choice === "2") {
+    const inv = gameState.player.inventory.length
+      ? gameState.player.inventory.join(", ")
+      : "Nothing";
+    showText(`Inventory: ${inv}`);
+  } else if (choice === "3") {
+    showText("You can't leave the village yet. The gate is locked.");
+  }
+}
